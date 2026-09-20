@@ -649,9 +649,7 @@
       return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
     }
 
-    // =========================================
     // РЕНДЕР КАТАЛОГА
-    // =========================================
     function renderProducts() {
       let filtered = products.filter(p => {
         const matchSearch = p.name.toLowerCase().includes(searchInput.value.toLowerCase());
@@ -701,9 +699,7 @@
     categorySelect.addEventListener('change', renderProducts);
     sortSelect.addEventListener('change', renderProducts);
 
-    // =========================================
     // КОРЗИНА
-    // =========================================
     function addToCart(id) {
       const item = cart.find(i => i.id === id);
       if (item) {
@@ -791,8 +787,6 @@
       clearCart();
       closeCart();
     }
-
-    // Запуск рендера при загрузке страницы
     renderProducts();
 
   </script>
