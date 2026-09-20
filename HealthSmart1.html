@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthSmart — умные гаджеты для здоровья</title>
+
+  <style>
+    /*ПЕРЕМЕННЫЕ И ТЕМА (ТОЛЬКО ТЁМНАЯ) */
+    :root {
+      color-scheme: dark;
+      --background: #0d1424;
+      --background-soft: #121c30;
+      --surface: #182338;
+      --surface-secondary: #1d2941;
+      --text: #eef5ff;
+      --muted: #acbad0;
+      --border: #30405e;
+      --blue: #6b99ff;
+      --turquoise: #45d3cf;
+      --violet: #a785ff;
+      --red: #ff8796;
+      --orange: #ffc268;
+      --header: rgba(13, 20, 36, 0.92);
+      --overlay: rgba(0, 0, 0, 0.78);
+      --gradient: linear-gradient(135deg, #2563eb 0%, #0ea5a8 55%, #7c3aed 100%);
+      --gradient-soft: linear-gradient(135deg, #172a51 0%, #153638 55%, #30234d 100%);
+      --shadow: 0 12px 34px rgba(0, 0, 0, 0.24);
+      --shadow-large: 0 26px 75px rgba(0, 0, 0, 0.42);
+      --radius-small: 12px;
+      --radius: 20px;
+      --radius-large: 30px;
+      --transition: 220ms ease;
+    }
+
+    /*БАЗОВЫЕ СТИЛИ И КЛЮЧЕВЫЕ АНИМАЦИИ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    
+    body {
+      margin: 0;
+      color: var(--text);
+      background: var(--background);
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      transition: color var(--transition), background var(--transition);
+    }
+
+    /* Анимация появления элементов (снизу вверх) */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    body.modal-open { overflow: hidden; }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+    h1, h2, h3, p { margin-top: 0; }
+
+    .container {
+      width: min(calc(100% - 40px), 1180px);
+      margin-inline: auto;
+    }
+
+    .section { padding-block: 80px; }
+    .section-soft { background: var(--background-soft); }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--blue);
+      font-size: 0.76rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .section-heading { margin-bottom: 38px; }
+    .section-heading.center { text-align: center; }
+
+    /*КНОПКИ*/
+    .button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform var(--transition), background var(--transition);
+    }
+    .button:hover { transform: translateY(-3px); }
+    .button:active { transform: scale(0.97); }
+    .button-primary { color: #ffffff; background: var(--gradient); }
+    .button-light { border-color: var(--border); background: var(--surface); }
+
+    /* ШАПКА */
+    .site-header {
+      position: sticky;
+      z-index: 1000;
+      top: 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--header);
+      backdrop-filter: blur(16px);
+    }
+
+    .header-inner {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .logo { font-size: 1.35rem; font-weight: bold; }
+    .main-nav { display: flex; gap: 20px; }
+    .main-nav a { font-weight: bold; color: var(--muted); transition: color 0.2s; }
+    .main-nav a:hover { color: var(--text); }
+
+    .cart-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 0;
+      color: #ffffff;
+      background: #14213d; /* На тёмном фоне кнопка корзины останется контрастной */
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform var(--transition);
+    }
+    .cart-button:hover { transform: scale(1.05); }
+    
+    .cart-count {
+      display: grid; place-items: center; width: 24px; height: 24px;
+      color: #ffffff; background: var(--blue); border-radius: 50%;
+    }
+
+    /* ГЛАВНЫЙ ЭКРАН */
+    .hero {
+      padding-block: 80px;
+      background: radial-gradient(circle at 10% 15%, rgba(37, 99, 235, 0.15), transparent 26%),
+                  var(--background);
+    }
+
+    .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    
+    /* анимация для левой и правой части */
+    .hero-grid > div:first-child { animation: fadeInUp 0.8s ease forwards; }
+    .hero-visual { position: relative; min-height: 400px; animation: fadeInUp 1s ease forwards; }
+
+    .hero h1 { font-size: 3rem; margin-bottom: 20px; }
+    
+    .hero-metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      padding: 0; margin-top: 30px; list-style: none;
+    }
+    .hero-metrics li { padding: 14px; background: var(--surface); border-radius: 15px; border: 1px solid var(--border); transition: transform 0.3s; }
+    .hero-metrics li:hover { transform: translateY(-5px); }
+    .hero-metrics strong { display: block; color: var(--blue); font-size: 1.1rem; }
+
+    @keyframes orbit-rotation {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .visual-orbit {
+      position: absolute; inset: 20px; border: 1px dashed var(--blue);
+      border-radius: 50%; opacity: 0.3;
+      animation: orbit-rotation 25s linear infinite;
+    }
+    
+    .watch {
+      position: absolute; top: 50%; left: 50%; width: 200px; height: 260px;
+      transform: translate(-50%, -50%);
+    }
+    .watch-strap {
+      position: absolute; top: -50px; bottom: -50px; left: 50%; width: 90px;
+      background: #101a2d; border-radius: 40px; transform: translateX(-50%);
+    }
+    .watch-face {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      background: #07101f; border-radius: 40px; border: 8px solid #1c2940; color: #fff;
+    }
+
+    /* КАТАЛОГ И ФИЛЬТРЫ*/
+    .catalog-toolbar {
+      display: grid; grid-template-columns: 1fr 200px 200px; gap: 14px; margin-bottom: 24px;
+    }
+    .search-box {
+      display: flex; align-items: center; padding: 0 15px;
+      border: 1px solid var(--border); background: var(--surface); border-radius: 14px;
+    }
+    .search-box input {
+      width: 100%; border: 0; outline: 0; background: transparent; color: var(--text); padding: 12px 0;
+    }
+    .toolbar-select {
+      width: 100%; padding: 12px 15px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); border-radius: 14px; outline: 0;
+    }
+
+    .product-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+    }
+
+    .product-card {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+      animation: fadeInUp 0.5s ease forwards;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-large);
+    }
+    
+    .product-image-wrap {
+      position: relative; aspect-ratio: 4/3; background: var(--gradient-soft); overflow: hidden;
+    }
+    
+    /* Зум картинки при наведении */
+    .product-image { 
+      width: 100%; height: 100%; object-fit: cover; 
+      transition: transform 0.4s ease;
+    }
+    .product-card:hover .product-image {
+      transform: scale(1.08);
+    }
+    
+    .product-badge {
+      position: absolute; top: 10px; left: 10px; padding: 4px 8px;
+      background: var(--blue); color: #fff; border-radius: 20px; font-size: 0.75rem; font-weight: bold;
+    }
+
+    .product-body { padding: 15px; display: flex; flex-direction: column; flex: 1; }
+    .product-category { color: var(--turquoise); font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+    .product-title { font-size: 1.1rem; margin: 5px 0 10px 0; }
+    .product-desc { color: var(--muted); font-size: 0.9rem; flex: 1; margin-bottom: 15px; }
+    
+    .price-row { display: flex; gap: 10px; align-items: baseline; margin-bottom: 15px; }
+    .current-price { font-size: 1.2rem; font-weight: bold; }
+    .old-price { text-decoration: line-through; color: var(--muted); font-size: 0.9rem; }
+
+    .product-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+
+    /* ПРЕИМУЩЕСТВА И ОТЗЫВЫ */
+    .advantages-grid, .reviews-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .advantage-card, .review-card { 
+      padding: 25px; border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius); 
+      transition: transform 0.3s ease;
+    }
+    .advantage-card:hover, .review-card:hover { transform: translateY(-5px); }
+    
+    .review-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+    .avatar { width: 45px; height: 45px; background: var(--gradient); border-radius: 50%; color: #fff; display: grid; place-items: center; font-weight: bold; }
+
+    .site-footer { padding-top: 50px; background: #070b14; color: #e8f0ff; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; padding-bottom: 40px; }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-block: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    
+    /* КОРЗИНА (МОДАЛЬНОЕ ОКНО) */
+    
+    /* Анимация окна корзины */
+    @keyframes modalShow {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal[hidden] { display: none; }
+    .modal { position: fixed; z-index: 3000; inset: 0; display: grid; place-items: center; padding: 15px; }
+    .modal-backdrop { position: absolute; inset: 0; background: var(--overlay); }
+    
+    .modal-panel {
+      position: relative; z-index: 1; width: 100%; max-width: 600px;
+      background: var(--surface); padding: 25px; border-radius: var(--radius-large); max-height: 90vh; overflow-y: auto;
+      animation: modalShow 0.3s ease forwards;
+    }
+    
+    .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
+    
+    .cart-item {
+      display: grid; grid-template-columns: 60px 1fr auto; gap: 15px; align-items: center;
+      padding: 10px; background: var(--surface-secondary); margin-bottom: 10px; border-radius: var(--radius-small);
+      animation: fadeInUp 0.3s ease forwards;
+    }
+    .cart-item img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    .quantity-controls { display: flex; gap: 10px; margin-top: 5px; align-items: center; }
+    .quantity-controls button { width: 25px; height: 25px; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--text); transition: background 0.2s;}
+    .quantity-controls button:hover { background: var(--background-soft); }
+    
+    .cart-summary { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .cart-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
+
+    /* МОБИЛЬНАЯ ВЕРСИЯ (АДАПТИВ) */
+    @media (max-width: 1000px) {
+      .product-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 20px; }
+      .hero-visual { display: none; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); }
+      .catalog-toolbar { grid-template-columns: 1fr; }
+      .advantages-grid, .reviews-grid, .footer-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .header-inner { flex-direction: column; gap: 10px; padding-block: 10px; }
+      .main-nav { flex-wrap: wrap; justify-content: center; }
+      .product-grid { grid-template-columns: 1fr; }
+      .hero-metrics { grid-template-columns: 1fr; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: 15px; }
+      .cart-item { grid-template-columns: 1fr; text-align: center; }
+      .cart-item img { margin: 0 auto; }
+      .quantity-controls { justify-content: center; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!--  ШАПКА -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">HealthSmart</div>
+
+      <nav class="main-nav">
+        <a href="#catalog">Каталог</a>
+        <a href="#advantages">Преимущества</a>
+        <a href="#reviews">Отзывы</a>
+      </nav>
+
+      <button class="cart-button" onclick="openCart()">
+        <span>Корзина</span>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ГЛАВНЫЙ ЭКРАН-->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="eyebrow">Технологии, которые заботятся</span>
+          <h1>Умные технологии для контроля здоровья</h1>
+          <p style="font-size: 1.1rem; color: var(--muted); margin-bottom: 25px;">
+            Современные устройства для отслеживания активности, сна, пульса и других важных показателей.
+          </p>
+          <a class="button button-primary" href="#catalog">Перейти в каталог</a>
+          
+          <ul class="hero-metrics">
+            <li><strong>5000+</strong><span>покупателей</span></li>
+            <li><strong>2 года</strong><span>гарантии</span></li>
+            <li><strong>4.8 из 5</strong><span>оценка</span></li>
+          </ul>
+        </div>
+
+        <div class="hero-visual">
+          <div class="visual-orbit"></div>
+          <div class="watch">
+            <div class="watch-strap"></div>
+            <div class="watch-face">
+              <span style="font-size: 2.5rem; font-weight: bold;">10:28</span>
+              <span style="color: #61e0d2;">72 уд/мин</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- КАТАЛОГ -->
+    <section class="section" id="catalog">
+      <div class="container">
+        <div class="section-heading">
+          <span class="eyebrow">Товары HealthSmart</span>
+          <h2>Каталог гаджетов</h2>
+        </div>
+
+        <div class="catalog-toolbar">
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск по названию...">
+          </div>
+          
+          <select class="toolbar-select" id="categorySelect">
+            <option value="all">Все категории</option>
+            <option value="watches">Умные часы</option>
+            <option value="bands">Фитнес-браслеты</option>
+            <option value="scales">Умные весы</option>
+            <option value="pressure">Тонометры</option>
+          </select>
+
+          <select class="toolbar-select" id="sortSelect">
+            <option value="popular">По популярности</option>
+            <option value="price-asc">Сначала дешевле</option>
+            <option value="price-desc">Сначала дороже</option>
+          </select>
+        </div>
+
+        <!-- Сюда с помощью JS будут вставляться карточки товаров -->
+        <div class="product-grid" id="productGrid"></div>
+      </div>
+    </section>
+
+    <!-- ПРЕИМУЩЕСТВА -->
+    <section class="section section-soft" id="advantages">
+      <div class="container">
+        <div class="section-heading center">
+          <h2>Почему выбирают нас</h2>
+        </div>
+
+        <div class="advantages-grid">
+          <div class="advantage-card">
+            <h3>Официальная гарантия</h3>
+            <p>На устройства предоставляется гарантия до двух лет от производителя.</p>
+          </div>
+          <div class="advantage-card">
+            <h3>Проверенные бренды</h3>
+            <p>Отбираем только функциональные гаджеты с точными датчиками.</p>
+          </div>
+          <div class="advantage-card">
+            <h3>Быстрая доставка</h3>
+            <p>Отправляем заказы курьером или в пункты выдачи по всей стране.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ОТЗЫВЫ -->
+    <section class="section" id="reviews">
+      <div class="container">
+        <div class="section-heading center">
+          <h2>Отзывы покупателей</h2>
+        </div>
+
+        <div class="reviews-grid">
+          <div class="review-card">
+            <div class="review-header">
+              <div class="avatar">АМ</div>
+              <div>
+                <h3 style="margin:0;">Алексей Морозов</h3>
+                <span style="color:var(--orange);">★★★★★</span>
+              </div>
+            </div>
+            <p>Купил HealthWatch Pro неделю назад. Шагомер иногда врет, но пульс меряет четко. Зарядки хватает дней на 5.</p>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="avatar">ЕП</div>
+              <div>
+                <h3 style="margin:0;">Екатерина Петрова</h3>
+                <span style="color:var(--orange);">★★★★★</span>
+              </div>
+            </div>
+            <p>Весы огонь! Синхронизируются с телефоном быстро, приложение удобное. Показывает не только вес, но и процент жира.</p>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="avatar">НС</div>
+              <div>
+                <h3 style="margin:0;">Николай Сафонов</h3>
+                <span style="color:var(--orange);">★★★★☆</span>
+              </div>
+            </div>
+            <p>Брали тонометр. Цифры крупные, всё видно. Правда манжета немного туговата, но за такие деньги норм.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- НИЗ САЙТА -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h2 style="margin:0;">HealthSmart</h2>
+        <p style="margin-top:10px;">Гаджеты для контроля активности, сна и показателей самочувствия.</p>
+      </div>
+      <div>
+        <h3>Контакты</h3>
+        <p>Телефон: +7 (495) 252-50-25</p>
+        <p>Email: hello@healthsmart.test</p>
+      </div>
+    </div>
+    
+    <div class="container footer-bottom">
+      <div>
+        <p style="margin: 0;">© 2026 HealthSmart. Учебный проект.</p>
+        <p style="margin: 5px 0 0 0; color: #63718c;">Студент: Харламова Т.И. Группа: 25ИС2-2</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- МОДАЛЬНОЕ ОКНО КОРЗИНЫ-->
+  <div class="modal" id="cartModal" hidden>
+    <div class="modal-backdrop" onclick="closeCart()"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2 style="margin:0;">Корзина</h2>
+        <button onclick="closeCart()" style="border:none; background:transparent; font-size:1.5rem; cursor:pointer; color:var(--text);">×</button>
+      </div>
+      
+      <div id="cartItemsList"></div>
+      
+      <div class="cart-summary" id="cartSummaryBlock">
+        <div style="display:flex; justify-content:space-between; font-size:1.2rem; font-weight:bold;">
+          <span>Итого:</span>
+          <span id="cartTotalPrice">0 ₽</span>
+        </div>
+        <div class="cart-actions">
+          <button class="button button-light" onclick="clearCart()">Очистить</button>
+          <button class="button button-primary" onclick="checkout()">Оформить заказ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // БАЗА ТОВАРОВ
+    const products = [
+      {
+        id: 1,
+        name: "HealthWatch Pro",
+        category: "watches",
+        catName: "Умные часы",
+        desc: "Умные часы для контроля активности и тренировок.",
+        price: 12990,
+        oldPrice: 14990,
+        badge: "Хит",
+        pop: 100,
+        image: "Chasi.jpg.jpg" 
+      },
+      {
+        id: 2,
+        name: "FitBand Air",
+        category: "bands",
+        catName: "Фитнес-браслеты",
+        desc: "Лёгкий браслет с шагомером и контролем сна.",
+        price: 4990,
+        oldPrice: 5990,
+        badge: "Скидка",
+        pop: 80,
+        image: "Braslet.jpg.jpg"
+      },
+      {
+        id: 3,
+        name: "BodyScan X",
+        category: "scales",
+        catName: "Умные весы",
+        desc: "Весы с анализом состава тела и приложением.",
+        price: 6990,
+        oldPrice: null,
+        badge: "Новинка",
+        pop: 90,
+        image: "Vesi.jpg.jpg"
+      },
+      {
+        id: 4,
+        name: "SmartPressure",
+        category: "pressure",
+        catName: "Тонометры",
+        desc: "Автоматический тонометр с крупным экраном.",
+        price: 7490,
+        oldPrice: 8490,
+        badge: "",
+        pop: 95,
+        image: "Tjnjmeter.jpg.jpg"
+      },
+      {
+        id: 5,
+        name: "OxyCheck Mini",
+        category: "scales",
+        catName: "Пульсоксиметры",
+        desc: "Компактный пульсоксиметр для измерения SpO₂ и частоты пульса.",
+        price: 3490,
+        oldPrice: 2990,
+        badge: "Скидка",
+        pop: 90,
+        image: "Pulis.jpg.jpg"
+      },
+      {
+        id: 6,
+        name: "SleepCare",
+        category: "scales",
+        catName: "Датчики сна",
+        desc: "Бесконтактный трекер сна с анализом продолжительности отдыха.",
+        price: 8990,
+        oldPrice: null,
+        badge: "Новинка",
+        pop: 80,
+        image: "Datchiksna.jpg.jpg"
+      },
+      {
+        id: 7,
+        name: "PostureGuard",
+        category: "bands",
+        catName: "Осанка",
+        desc: "Умный корректор осанки с мягким вибрационным напоминанием.",
+        price: 4990,
+        oldPrice: 4290,
+        badge: "Скидка",
+        pop: 80,
+        image: "Osank.jpg.jpg"
+      },
+      {
+        id: 8,
+        name: "ThermoLink",
+        category: "bands",
+        catName: "Умные термометры",
+        desc: "Бесконтактный термометр с быстрым измерением и памятью.",
+        price: 3590,
+        oldPrice: null,
+        badge: "Новинка",
+        pop: 70,
+        image: "Termometr.jpg.jpg"
+      }
+    ];
+
+    let cart = [];
+    
+    // Элементы
+    const productGrid = document.getElementById('productGrid');
+    const searchInput = document.getElementById('searchInput');
+    const categorySelect = document.getElementById('categorySelect');
+    const sortSelect = document.getElementById('sortSelect');
+    
+    // Форматирование цены
+    const formatPrice = (price) => new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
+
+    // Функция проверки картинки (возвращает заглушку, если картинка не указана)
+    function getImgSrc(prod) {
+      if (prod.image && prod.image !== "") {
+        return prod.image;
+      }
+      // Генерируем картинку с буквой товара, если реальной картинки еще нет
+      const letter = prod.name.charAt(0).toUpperCase();
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#121c30"/><text x="50" y="55" font-family="Arial" font-size="40" font-weight="bold" fill="#6b99ff" text-anchor="middle" dominant-baseline="middle">${letter}</text></svg>`;
+      return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+    }
+
+    // =========================================
+    // РЕНДЕР КАТАЛОГА
+    // =========================================
+    function renderProducts() {
+      let filtered = products.filter(p => {
+        const matchSearch = p.name.toLowerCase().includes(searchInput.value.toLowerCase());
+        const matchCat = categorySelect.value === 'all' || p.category === categorySelect.value;
+        return matchSearch && matchCat;
+      });
+
+      if (sortSelect.value === 'price-asc') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortSelect.value === 'price-desc') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else {
+        filtered.sort((a, b) => b.pop - a.pop);
+      }
+
+      let html = '';
+      filtered.forEach(p => {
+        let oldPriceHtml = p.oldPrice ? `<span class="old-price">${formatPrice(p.oldPrice)}</span>` : '';
+        let badgeHtml = p.badge ? `<span class="product-badge">${p.badge}</span>` : '';
+        let imgSrc = getImgSrc(p); 
+        
+        html += `
+          <div class="product-card">
+            <div class="product-image-wrap">
+              <img src="${imgSrc}" class="product-image" alt="${p.name}">
+              ${badgeHtml}
+            </div>
+            <div class="product-body">
+              <span class="product-category">${p.catName}</span>
+              <h3 class="product-title">${p.name}</h3>
+              <p class="product-desc">${p.desc}</p>
+              <div class="price-row">
+                <strong class="current-price">${formatPrice(p.price)}</strong>
+                ${oldPriceHtml}
+              </div>
+              <button class="button button-primary" onclick="addToCart(${p.id})">В корзину</button>
+            </div>
+          </div>
+        `;
+      });
+
+      productGrid.innerHTML = html || '<p style="grid-column: 1/-1; text-align:center;">Ничего не найдено</p>';
+    }
+
+    // Слушатели для фильтров
+    searchInput.addEventListener('input', renderProducts);
+    categorySelect.addEventListener('change', renderProducts);
+    sortSelect.addEventListener('change', renderProducts);
+
+    // =========================================
+    // КОРЗИНА
+    // =========================================
+    function addToCart(id) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+        item.qty++;
+      } else {
+        cart.push({ id: id, qty: 1 });
+      }
+      console.log('Добавлено в корзину:', id);
+      updateCartUI();
+      alert("Товар добавлен в корзину!");
+    }
+
+    function openCart() {
+      renderCartItems();
+      document.getElementById('cartModal').hidden = false;
+      document.body.classList.add('modal-open');
+    }
+
+    function closeCart() {
+      document.getElementById('cartModal').hidden = true;
+      document.body.classList.remove('modal-open');
+    }
+
+    function updateCartUI() {
+      document.getElementById('cartCount').textContent = cart.reduce((sum, item) => sum + item.qty, 0);
+    }
+
+    function renderCartItems() {
+      const list = document.getElementById('cartItemsList');
+      const summary = document.getElementById('cartSummaryBlock');
+      
+      if (cart.length === 0) {
+        list.innerHTML = '<p>Корзина пуста</p>';
+        summary.style.display = 'none';
+        return;
+      }
+
+      summary.style.display = 'block';
+      let html = '';
+      let total = 0;
+
+      cart.forEach(item => {
+        const p = products.find(prod => prod.id === item.id);
+        total += p.price * item.qty;
+        let imgSrc = getImgSrc(p);
+
+        html += `
+          <div class="cart-item">
+            <img src="${imgSrc}" alt="${p.name}">
+            <div>
+              <h3 style="margin:0 0 5px 0; font-size:1rem;">${p.name}</h3>
+              <div class="quantity-controls">
+                <button onclick="changeQty(${p.id}, -1)">-</button>
+                <span>${item.qty} шт</span>
+                <button onclick="changeQty(${p.id}, 1)">+</button>
+              </div>
+            </div>
+            <strong>${formatPrice(p.price * item.qty)}</strong>
+          </div>
+        `;
+      });
+
+      list.innerHTML = html;
+      document.getElementById('cartTotalPrice').textContent = formatPrice(total);
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (item) {
+        item.qty += delta;
+        if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
+        renderCartItems();
+        updateCartUI();
+      }
+    }
+
+    function clearCart() {
+      cart = [];
+      renderCartItems();
+      updateCartUI();
+    }
+
+    function checkout() {
+      alert("Демо-версия. Заказ успешно оформлен!");
+      clearCart();
+      closeCart();
+    }
+
+    // Запуск рендера при загрузке страницы
+    renderProducts();
+
+  </script>
+</body>
+</html>
